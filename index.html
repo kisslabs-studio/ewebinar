@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eWebinar hero globe</title>
+    <style>
+      :root {
+        color: #061c36;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: #eef2ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      .hero {
+        position: relative;
+        min-height: 916px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 73% 30%, #b5c7fb 0, transparent 33%),
+          linear-gradient(120deg, #f5f7ff 0%, #dce5ff 46%, #aebff1 100%);
+      }
+
+      .hero__content {
+        position: relative;
+        z-index: 2;
+        width: min(1690px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 150px 0 120px;
+        pointer-events: none;
+      }
+
+      .hero__copy {
+        width: min(880px, 54%);
+        pointer-events: auto;
+      }
+
+      h1 {
+        max-width: 880px;
+        margin: 0;
+        font-size: clamp(3rem, 5.2vw, 4.6rem);
+        line-height: 0.98;
+        letter-spacing: -0.055em;
+      }
+
+      p {
+        max-width: 520px;
+        margin: 32px 0 0;
+        font-size: 1.25rem;
+        line-height: 1.55;
+      }
+
+      .hero__button {
+        display: inline-flex;
+        margin-top: 34px;
+        padding: 15px 24px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+        background: #f15b62;
+        box-shadow: 0 10px 30px rgb(241 91 98 / 22%);
+      }
+
+      .hero-globe {
+        position: absolute;
+        z-index: 1;
+        top: clamp(96px, 12%, 109px);
+        right: clamp(-240px, -13.5vw, -130px);
+        width: min(65.34vw, 1129px);
+        aspect-ratio: 1;
+        transform: none;
+        pointer-events: none;
+      }
+
+      .hero-globe::after {
+        position: absolute;
+        inset: 7%;
+        border-radius: 50%;
+        box-shadow: 0 45px 90px rgb(32 58 130 / 18%);
+        content: "";
+        pointer-events: none;
+      }
+
+      .hero-globe canvas {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 700ms ease;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          min-height: 780px;
+        }
+
+        .hero__content {
+          padding-top: 96px;
+        }
+
+        .hero__copy {
+          width: min(600px, 85%);
+        }
+
+        .hero-globe {
+          top: auto;
+          right: -13vw;
+          bottom: -22vw;
+          width: 76vw;
+          transform: none;
+          opacity: 0.74;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .hero {
+          min-height: 820px;
+        }
+
+        .hero__content {
+          width: min(100% - 32px, 1180px);
+          padding-top: 72px;
+        }
+
+        .hero__copy {
+          width: 100%;
+        }
+
+        h1 {
+          font-size: clamp(2.7rem, 13vw, 4rem);
+        }
+
+        p {
+          font-size: 1.05rem;
+        }
+
+        .hero-globe {
+          right: -26vw;
+          bottom: -8vw;
+          width: 105vw;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero-globe canvas {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="hero__content">
+          <div class="hero__copy">
+            <h1>Sell to every prospect, in every time zone, 24/7</h1>
+            <p>
+              When every demo is 1-on-1, you can only get in front of so many
+              people. Every prospect you don’t reach is revenue for your
+              competitor.
+            </p>
+            <a class="hero__button" href="#">Watch our demo</a>
+          </div>
+        </div>
+
+        <div class="hero-globe" aria-hidden="true">
+          <canvas id="hero-cobe-globe"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import createGlobe from "https://esm.sh/cobe@2.0.1";
+
+      const canvas = document.querySelector("#hero-cobe-globe");
+      const wrapper = canvas.closest(".hero-globe");
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      );
+
+      const markerSize = 0.04;
+      const worldCities = [
+        [37.7749, -122.4194], // San Francisco
+        [40.7128, -74.006], // New York
+        [19.4326, -99.1332], // Mexico City
+        [-23.5505, -46.6333], // São Paulo
+        [51.5072, -0.1276], // London
+        [48.8566, 2.3522], // Paris
+        [52.52, 13.405], // Berlin
+        [-33.9249, 18.4241], // Cape Town
+        [25.2048, 55.2708], // Dubai
+        [1.3521, 103.8198], // Singapore
+        [35.6762, 139.6503], // Tokyo
+        [-33.8688, 151.2093], // Sydney
+      ];
+
+      const markers = worldCities.map((location) => ({
+        location,
+        size: markerSize,
+      }));
+
+      const arcs = [
+        { from: worldCities[0], to: worldCities[4] },
+        { from: worldCities[1], to: worldCities[3] },
+        { from: worldCities[4], to: worldCities[8] },
+        { from: worldCities[8], to: worldCities[10] },
+        { from: worldCities[9], to: worldCities[11] },
+      ];
+
+      let globe;
+      let phi = 0.55;
+      let frame;
+      let resizeTimer;
+
+      function mountGlobe() {
+        const size = Math.round(wrapper.getBoundingClientRect().width);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        if (!size) return;
+
+        cancelAnimationFrame(frame);
+        globe?.destroy();
+
+        globe = createGlobe(canvas, {
+          devicePixelRatio: dpr,
+          width: size * dpr,
+          height: size * dpr,
+          phi,
+          theta: 0.2,
+          dark: 0,
+          diffuse: 3,
+          mapSamples: 13000,
+          mapBrightness: 6,
+          scale: 1.08,
+          baseColor: [1, 1, 1],
+          markerColor: [0.03, 0.2, 0.82],
+          glowColor: [0.93, 0.95, 1],
+          markers,
+          arcs,
+          arcColor: [0.03, 0.2, 0.82],
+          arcHeight: 0.25,
+          arcWidth: 0.4,
+          markerElevation: 0.01,
+        });
+
+        canvas.style.opacity = "1";
+
+        function animate() {
+          if (!reduceMotion.matches) {
+            phi += 0.0025;
+            globe.update({ phi });
+          }
+          frame = requestAnimationFrame(animate);
+        }
+
+        animate();
+      }
+
+      mountGlobe();
+
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(mountGlobe, 150);
+      });
+
+      window.addEventListener("pagehide", () => {
+        cancelAnimationFrame(frame);
+        globe?.destroy();
+      });
+    </script>
+  </body>
+</html>
